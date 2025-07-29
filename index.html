@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Boutique Shop - WhatsApp Order</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: #f9fafb;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    h1 {
+      color: #6a1b9a;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    /* Container with grid layout */
+    .container {
+      max-width: 900px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 2rem;
+    }
+
+    /* Product list styling */
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .product-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #4a148c;
+    }
+
+    .product-price {
+      font-size: 1rem;
+      color: #ab47bc;
+      margin-bottom: 1rem;
+    }
+
+    input[type="number"] {
+      width: 70px;
+      padding: 6px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+      outline-offset: 2px;
+      transition: border-color 0.3s ease;
+    }
+    input[type="number"]:focus {
+      border-color: #6a1b9a;
+    }
+
+    /* Order summary box */
+    .order-summary {
+      background: #4a148c;
+      color: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .order-summary h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #ce93d8;
+      padding-bottom: 0.5rem;
+    }
+
+    .order-items {
+      flex-grow: 1;
+      overflow-y: auto;
+      max-height: 300px;
+    }
+    .order-item {
+      margin-bottom: 0.7rem;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 0.3rem;
+    }
+
+    .total {
+      font-weight: 700;
+      font-size: 1.3rem;
+      border-top: 2px solid #ce93d8;
+      padding-top: 0.6rem;
+      margin-top: 0.6rem;
+      text-align: right;
+    }
+
+    button {
+      background: #6a1b9a;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 0;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background-color: #4a148c;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      .order-summary {
+        position: static;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Boutique Shop - WhatsApp Order</h1>
+
+  <div class="container">
+    <div class="products" id="products">
+      <!-- Products injected by JS -->
+    </div>
+
+    <div class="order-summary" aria-live="polite" aria-label="Order summary">
+      <h2>Your Order</h2>
+      <div class="order-items" id="orderItems">
+        <p>No items selected</p>
+      </div>
+      <div class="total" id="totalPrice">Total: K0</div>
+      <button onclick="placeOrder()" aria-label="Place order via WhatsApp">Place Order via WhatsApp</button>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+      {id: 1, name: "Men's T-Shirt", price: 120, image: "https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=400&q=80"},
+      {id: 2, name: "Women's Dress", price: 250, image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=400&q=80"},
+      {id: 3, name: "Leather Belt", price: 90, image: "https://images.unsplash.com/photo-1536645009908-3e9a52976398?auto=format&fit=crop&w=400&q=80"},
+      {id: 4, name: "Sneakers (Pair)", price: 600, image: "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=400&q=80"},
+      {id: 5, name: "Handbag", price: 400, image: "https://images.unsplash.com/photo-1533777324565-a04df0e527b7?auto=format&fit=crop&w=400&q=80"},
+      {id: 6, name: "Formal Shoes", price: 700, image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=400&q=80"},
+      {id: 7, name: "Scarf", price: 80, image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=400&q=80"},
+      {id: 8, name: "Jeans", price: 300, image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=400&q=80"},
+      {id: 9, name: "Watch", price: 1000, image: "https://images.unsplash.com/photo-1519741495981-1b8bcbe9b5ff?auto=format&fit=crop&w=400&q=80"},
+      {id: 10, name: "Sunglasses", price: 350, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"},
+    ];
+
+    const productsContainer = document.getElementById('products');
+    const orderItemsContainer = document.getElementById('orderItems');
+    const totalPriceEl = document.getElementById('totalPrice');
+
+    // Generate product cards with images
+    products.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy" />
+        <div class="product-name">${product.name}</div>
+        <div class="product-price">K${product.price}</div>
+        <input type="number" min="0" value="0" aria-label="Quantity for ${product.name}" data-id="${product.id}" />
+      `;
+      productsContainer.appendChild(card);
+    });
+
+    // Update order summary when quantities change
+    productsContainer.addEventListener('input', e => {
+      if (e.target.tagName.toLowerCase() === 'input') {
+        updateOrderSummary();
+      }
+    });
+
+    function updateOrderSummary() {
+      const inputs = productsContainer.querySelectorAll('input[type="number"]');
+      let total = 0;
+      let orderItems = [];
+
+      inputs.forEach(input => {
+        const qty = parseInt(input.value);
+        const product = products.find(p => p.id === parseInt(input.dataset.id));
+        if (qty > 0) {
+          const cost = qty * product.price;
+          total += cost;
+          orderItems.push(`${qty} x ${product.name} (K${cost})`);
+        }
+      });
+
+      if (orderItems.length === 0) {
+        orderItemsContainer.innerHTML = `<p>No items selected</p>`;
+      } else {
+        orderItemsContainer.innerHTML = '';
+        orderItems.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'order-item';
+          div.textContent = item;
+          orderItemsContainer.appendChild(div);
+        });
+      }
+
+      totalPriceEl.textContent = `Total: K${total}`;
+    }
+
+    // WhatsApp order link
+    const whatsappNumber = "260971234567"; // replace with your actual WhatsApp number
+
+    function placeOrder() {
+      const inputs = productsContainer.querySelectorAll('input[type="number"]');
+      let orderItems = [];
+      let total = 0;
+
+      inputs.forEach(input => {
+        const qty = parseInt(input.value);
+        const product = products.find(p => p.id === parseInt(input.dataset.id));
+        if (qty > 0) {
+          const cost = qty * product.price;
+          total += cost;
+          orderItems.push(`${qty} x ${product.name} (K${cost})`);
+        }
+      });
+
+      if (orderItems.length === 0) {
+        alert("Please select at least one product.");
+        return;
+      }
+
+      const message = `Hello! I would like to order:\n${orderItems.join('\n')}\nTotal: K${total}\nPlease confirm availability and delivery options.`;
+      const encodedMessage = encodeURIComponent(message);
+      const waLink = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+      window.open(waLink, "_blank");
+    }
+
+    // Initialize empty order summary
+    updateOrderSummary();
+  </script>
+</body>
+</html>
